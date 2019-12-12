@@ -12,7 +12,10 @@ import (
 var newmsg = common.NewMessage
 
 func (s *Server) initTunnel() error {
-	ln, err := quic.ListenAddr(":2723", generateTLSConfig(), &quic.Config{
+	cfg := generateTLSConfig()
+	fmt.Println("Allowed protos: ", cfg.NextProtos)
+	cfg.NextProtos = []string{"h2", "http/1.1", "acme-tls/1", "quic-echo-example"}
+	ln, err := quic.ListenAddr(":2723", cfg, &quic.Config{
 		IdleTimeout: time.Second * time.Duration(s.idleTimeout),
 	})
 	if err != nil {

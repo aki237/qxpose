@@ -9,7 +9,10 @@ import (
 )
 
 func (s *Server) initPublic() error {
-	ln, err := tls.Listen("tcp", ":443", generateTLSConfig())
+	cfg := generateTLSConfig()
+	fmt.Println("Allowed protos: ", cfg.NextProtos)
+	cfg.NextProtos = []string{"http/1.1", "acme-tls/1", "quic-echo-example"}
+	ln, err := tls.Listen("tcp", ":443", cfg)
 	if err != nil {
 		return err
 	}

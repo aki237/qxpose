@@ -5,11 +5,30 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/binary"
+	"encoding/hex"
 	"encoding/pem"
 	"math/big"
+	"time"
+
+	"github.com/mholt/certmagic"
 )
 
 func generateTLSConfig() *tls.Config {
+	certmagic.Default.OnDemand = &certmagic.OnDemandConfig{
+		DecisionFunc: func(name string) error {
+			return nil
+		},
+	}
+
+	certmagic.Default.Agreed = true
+	certmagic.Default.Email = "akilan1997@gmail.com"
+	certmagic.Default.CA = certmagic.LetsEncryptProductionCA
+
+	return certmagic.NewDefault().TLSConfig()
+}
+
+func generateTLSConfigFallback() *tls.Config {
 	key, err := rsa.GenerateKey(rand.Reader, 1024)
 	if err != nil {
 		panic(err)
@@ -34,10 +53,10 @@ func generateTLSConfig() *tls.Config {
 }
 
 func genRandomString() string {
-	return "fb6b5b1749f59e70"
-	// x := make([]byte, 8)
-	// binary.LittleEndian.PutUint64(x, uint64(time.Now().UnixNano()))
-	// return hex.EncodeToString(XOR(x, []byte("SampleKey")))
+	// return "fb6b5b1749f59e70"
+	x := make([]byte, 8)
+	binary.LittleEndian.PutUint64(x, uint64(time.Now().UnixNano()))
+	return hex.EncodeToString(XOR(x, []byte("SampleKey")))
 }
 
 // XOR is used to get the XOR of 2 byte arrays
